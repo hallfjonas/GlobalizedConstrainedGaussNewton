@@ -60,9 +60,8 @@ G = @(x) [v_R(x(1:3,1)) u_R(x(1:3,1)) v_L(x(1:3,1)) u_L(x(1:3,1))]';
 R_g = @(X) residual_constrained(X, Y, F, G, N, n_x, n_y, std_w, std_v);
 
 %% Initial guess: simulate system deterministically
+g_init = 10*rand(); % Random start values.
 x_init_true = [5 -7 1.7 5 5 10]' + 1;  % true inital state
-g_init = 10*rand();                    % Random start values.
-
 X_init = zeros(n_x, N+1);
 X_init(:, 1) = x_init_true;
 
@@ -72,7 +71,6 @@ end
 
 X_init = reshape(X_init, (N+1)*n_x, 1);    % reshape to column vector
 X_init = [X_init; g_init];
-
 
 %% Solve estimation problem
 % Parameters
@@ -114,61 +112,48 @@ for k=1:K
    end
 end
 
-%% Plots
-figure(1);
-
 %% Plot estimated 2D projections and measurements
-title('');
-s1 = subplot(3,2,1); hold on; grid on;
-title('Left eye measurements and estimations (2D projections).');
-plot(Y(3, :), Y(4,:), 'bo');
-plot(Y_opt(3, :), Y_opt(4, :), 'b.-');
-legend('Y measured', 'Y estimated');
-
-s2 = subplot(3,2,2); hold on; grid on; 
-title('Right eye measurements and estimations (2D projections).');
+figure(1); 
+s1 = subplot(2,1,2); hold on; grid on; 
+title('Right eye');
 plot(Y(1, :), Y(2,:), 'ro');
 plot(Y_opt(1, :), Y_opt(2, :), 'r.-');
 legend('Y measured', 'Y estimated');
 
-%linkaxes([s1, s2], 'x')
-%linkaxes([s1, s2], 'y')
+s2= subplot(2,1,1); hold on; grid on;
+title('Left eye');
+plot(Y(3, :), Y(4,:), 'bo');
+plot(Y_opt(3, :), Y_opt(4, :), 'b.-');
+legend('Y measured', 'Y estimated');
+
+linkaxes([s1, s2], 'x')
+linkaxes([s1, s2], 'y')
 
 %% Plot h values
-s3 = subplot(3,2,3); hold on; grid on;
-title('Estimated gravitational force per iteration');
+figure(2); hold on;
+title('g values per iteration');
 plot(1:K, g_all(1:K));
 plot(1:K, g_true*ones(K,1));
-legend('estimation', 'true');
-
-%% Plot estimated and true 3D trajectories
-s4 = subplot(3,2,[4,5]); hold on; grid on;
-title('Estimated and true 3D trajectories.');
-
-% Plot trajectories
-plot3(X_true(1, :), X_true(2, :), X_true(3, :), 'kx-');
-plot3(X_opt(1, :), X_opt(2, :), X_opt(3, :), 'b-');
-
-% Camera positions
-plot3(P_R(1), P_R(2), P_R(3), 'ro', 'MarkerSize', 5); 
-plot3(P_L(1), P_L(2), P_L(3), 'bo', 'MarkerSize', 5);
-
-% Camera views
-quiver3(P_R(1), P_R(2), P_R(3), 5*e_l(1), 5*e_l(2), 5*e_l(3), 'r')
-quiver3(P_L(1), P_L(2), P_L(3), 5*e_l(1), 5*e_l(2), 5*e_l(3), 'b')
-
-% Adjust view
-view([-100, 7]);
-
-% Add legend
-legend('true', 'estimated', 'Camera 1', 'Camera 2');
+legend('g vals', 'g true');
 
 %% Plot x moving
-s5 = subplot(3,2,6); hold off; grid on; 
+figure(3); 
 for i=1:K
     plot(Y(3, :), Y(4,:), 'ro', Y_all(3, :, i), Y_all(4, :, i), 'b.-');
-    title('The fitting process');
     legend('Y measured', sprintf('Y estimated (k = %d)', i));
     anim(i) = getframe;
     pause(0.01);
 end
+
+%% Plot estimated and true 3D trajectories
+figure(4); hold on; grid on;
+plot3(X_true(1, :), X_true(2, :), X_true(3, :), 'kx-');
+plot3(X_opt(1, :), X_opt(2, :), X_opt(3, :), 'b-');
+
+plot3(P_R(1), P_R(2), P_R(3), 'ro', 'MarkerSize', 5); 
+plot3(P_L(1), P_L(2), P_L(3), 'bo', 'MarkerSize', 5);
+
+quiver3(P_R(1), P_R(2), P_R(3), 5*e_l(1), 5*e_l(2), 5*e_l(3), 'r')
+quiver3(P_L(1), P_L(2), P_L(3), 5*e_l(1), 5*e_l(2), 5*e_l(3), 'b')
+
+view([-100, 7]);

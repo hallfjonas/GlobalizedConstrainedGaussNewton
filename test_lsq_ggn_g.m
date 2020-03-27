@@ -93,3 +93,4 @@ tic;
 time_ggn = toc;
 
 fprintf('norm(R_lsq) - norm(R_ggn) = %e || time_lsq = %f s || time_ggn = %f s\n', norm(R_opt_lsq) - norm(R_opt), time_lsq, time_ggn);
+X_opt_col
