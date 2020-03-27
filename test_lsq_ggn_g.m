@@ -1,12 +1,10 @@
 close all;
 clear;
 
-g_init = 10; % Initial gravity.
-
 % Import envoironments.
 import casadi.*
-%% Load measurements
 
+%% Load measurements
 data = load('volleyball_cameras.mat');
 
 Y = data.Y_measured;   % measurements, n_y x N              [1, ..., N]
@@ -62,8 +60,9 @@ G = @(x) [v_R(x(1:3,1)) u_R(x(1:3,1)) v_L(x(1:3,1)) u_L(x(1:3,1))]';
 R_no_const = @(X) residual(X, Y, F, G, N, n_x, n_y, std_w, std_v);
 
 %% Initial guess: simulate system deterministically
-x_init_true = [5 -7 1.7 5 5 10]' + 1;  % true inital state
+g_init = 10; % Initial gravity.
 
+x_init_true = [5 -7 1.7 5 5 10]' + 1;  % true inital state
 X_init = zeros(n_x, N+1);
 X_init(:, 1) = x_init_true;
 
@@ -73,7 +72,6 @@ end
 
 X_init = reshape(X_init, (N+1)*n_x, 1);    % reshape to column vector
 X_init = [X_init; g_init];
-
 
 %% Solve estimation problem
 tic;
@@ -93,4 +91,3 @@ tic;
 time_ggn = toc;
 
 fprintf('norm(R_lsq) - norm(R_ggn) = %e || time_lsq = %f s || time_ggn = %f s\n', norm(R_opt_lsq) - norm(R_opt), time_lsq, time_ggn);
-X_opt_col
